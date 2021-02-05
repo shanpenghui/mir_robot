@@ -1,3 +1,72 @@
+# System 
+
+Ubuntu 20.04
+noetic
+
+# Discussion
+
+## Dependency
+拷贝下来之后第一个坑就是没切换分支，导致卡了一下，因为默认分支是melodic，我用的是noetic，用
+```
+rosdep install --from-paths ./ -i -y --rosdistro noetic
+```
+会提示：
+```
+WARNING: given --rosdistro kinetic but ROS_DISTRO is "noetic". Ignoring environment.
+ERROR: the following packages/stacks could not have their rosdep keys resolved
+to system dependencies:
+mir_gazebo: No definition of [robot_localization] for OS version [focal]
+mir_driver: No definition of [rospy_message_converter] for OS version [focal]
+mir_navigation: No definition of [sbpl_lattice_planner] for OS version [focal]
+mir_dwb_critics: No definition of [nav_grid_iterators] for OS version [focal]
+```
+然后我用指令去查到底是什么包没有：
+```
+rosdep check --from src/mir_robot/ -ir
+```
+结果是：
+```
+System dependencies have not been satisfied:
+apt	ros-noetic-rospy-message-converter
+apt	ros-noetic-costmap-queue
+apt	ros-noetic-dwb-critics
+apt	ros-noetic-dwb-local-planner
+apt	ros-noetic-nav-2d-msgs
+apt	ros-noetic-nav-2d-utils
+apt	ros-noetic-nav-core2
+apt	ros-noetic-nav-grid-iterators
+apt	ros-noetic-dwb-plugins
+apt	ros-noetic-hector-mapping
+apt	ros-noetic-nav-core-adapter
+apt	ros-noetic-sbpl-lattice-planner
+apt	ros-noetic-fake-localization
+apt	ros-noetic-robot-localization
+ERROR[mir_driver]: No definition of [python-websocket] for OS version [focal]
+	rosdep key : python-websocket
+	OS name    : ubuntu
+	OS version : focal
+	Data:
+debian:
+		- python-websocket
+		fedora:
+。。。。。。。
+```
+太长我就不贴完整了。后来看到系统安装的是focal才想起来，这系统版本不对啊！原来是分支不对。
+
+## Laser 
+
+报错信息是：
+```
+[ WARN] [1612507963.308316328, 41.475000000]: No laser scan received (and thus no pose updates have been published) for 41.475000 seconds.  Verify that data is being published on the /scan topic.
+[ WARN] [1612507963.308491586, 41.475000000]: No laser scan received (and thus no pose updates have been published) for 41.475000 seconds.  Verify that data is being published on the /scan topic.
+```
+
+先说明，我用的是Ubuntu20，新安装noetic和mir_robot之后发现没有激光数据，猜测应该是依赖没装好，但是最坑的是运行起来没有提示或报错，所以把正常运行之后用过的安装指令贴下来，让大家不再采坑。
+
+```
+sudo apt install python3-catkin-tools python3-osrf-pycommon apt-utils build-essential pkg-config psmisc vim-gtk git libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev gfortran openexr libatlas-base-dev python3-dev python3-numpy libtbb2 libtbb-dev libdc1394-22-dev libgl1-mesa-dev libglew-dev libegl1-mesa-dev libwayland-dev libxkbcommon-dev wayland-protocols libeigen3-dev libvtk6-dev libvtk6-qt-dev ros-noetic-robot-navigation ros-noetic-rospy-message-converter ros-noetic-amcl ros-noetic-move-base ros-noetic-hector-mapping ros-noetic-gazebo-ros-pkgs ros-foxy-gazebo-ros-pkgs
+```
+
 mir_driver
 ==========
 
